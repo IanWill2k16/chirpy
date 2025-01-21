@@ -27,10 +27,6 @@ type cleanedParameters struct {
 	CleanBody string `json:"cleaned_body"`
 }
 
-type validParameters struct {
-	Valid bool `json:"valid"`
-}
-
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -41,7 +37,7 @@ type User struct {
 type Chirp struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at`
+	UpdatedAt time.Time `json:"updated_at"`
 	Body      string    `json:"body"`
 	UserID    uuid.UUID `json:"user_id"`
 }
