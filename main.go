@@ -16,6 +16,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	envPlatform    string
+	jwtSecret      string
 }
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 
 	dbURL := os.Getenv("DB_URL")
 	envPlatformVar := os.Getenv("PLATFORM")
+	jwtSecretVar := os.Getenv("JWT_SECRET")
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -32,6 +34,7 @@ func main() {
 	apiCfg := &apiConfig{
 		dbQueries:   database.New(db),
 		envPlatform: envPlatformVar,
+		jwtSecret:   jwtSecretVar,
 	}
 
 	const port = "8080"
@@ -44,11 +47,14 @@ func main() {
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir("./app")))))
 
 	mux.HandleFunc("GET /api/healthz", healthResp)
+
 	mux.HandleFunc("POST /api/users", apiCfg.createUser)
 	mux.HandleFunc("POST /api/login", apiCfg.loginUser)
+
 	mux.HandleFunc("POST /api/chirps", apiCfg.createChirp)
 	mux.HandleFunc("GET /api/chirps", apiCfg.getChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.getSingleChirp)
+
 	mux.HandleFunc("GET /admin/metrics", apiCfg.countResp)
 	mux.HandleFunc("POST /admin/reset", apiCfg.adminReset)
 

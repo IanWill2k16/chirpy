@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/IanWill2k16/chirpy/internal/auth"
 	"github.com/IanWill2k16/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -19,8 +21,7 @@ type Chirp struct {
 }
 
 type parameters struct {
-	Body   string    `json:"body"`
-	UserID uuid.UUID `json:"user_id"`
+	Body string `json:"body"`
 }
 
 type cleanedParameters struct {
@@ -33,6 +34,18 @@ func (cfg *apiConfig) createChirp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error decoding JSON: %v", err)
 		returnError(w, "Something went wrong", 500)
+		return
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		returnError(w, fmt.Sprintf("error with bearer token: %v", err), 400)
+		return
+	}
+
+	userid, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	if err != nil {
+		returnError(w, fmt.Sprintf("Unauthorized: %v", err), 401)
 		return
 	}
 
@@ -56,7 +69,7 @@ func (cfg *apiConfig) createChirp(w http.ResponseWriter, r *http.Request) {
 
 	chirpParams := database.CreateChirpParams{
 		Body:   cleanParams.CleanBody,
-		UserID: params.UserID,
+		UserID: userid,
 	}
 
 	resp, err := cfg.dbQueries.CreateChirp(r.Context(), chirpParams)
@@ -70,7 +83,7 @@ func (cfg *apiConfig) createChirp(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: resp.CreatedAt,
 		UpdatedAt: resp.UpdatedAt,
 		Body:      resp.Body,
-		UserID:    resp.UserID,
+		UserID:    userid,
 	}
 
 	err = encodeJSON(w, &chirpReturn, 201)
