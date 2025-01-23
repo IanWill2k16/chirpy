@@ -12,9 +12,8 @@ import (
 func TestJWTCreateAndValidate(t *testing.T) {
 	userID := uuid.New()
 	secret := "test-secret"
-	duration := time.Hour
 
-	token, err := MakeJWT(userID, secret, duration)
+	token, err := MakeJWT(userID, secret)
 	if err != nil {
 		t.Fatalf("Failed to create token: %v", err)
 	}
@@ -31,9 +30,8 @@ func TestJWTCreateAndValidate(t *testing.T) {
 func TestJWTCreateAndValidateExpired(t *testing.T) {
 	userID := uuid.New()
 	secret := "test-secret"
-	duration := time.Millisecond
 
-	token, err := MakeJWT(userID, secret, duration)
+	token, err := MakeJWT(userID, secret)
 	if err != nil {
 		t.Fatalf("Failed to create token: %v", err)
 	}
