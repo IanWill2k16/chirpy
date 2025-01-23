@@ -12,10 +12,11 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (cfg *apiConfig) createUser(w http.ResponseWriter, r *http.Request) {
@@ -43,10 +44,11 @@ func (cfg *apiConfig) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userReturn := User{
-		ID:        userData.ID,
-		CreatedAt: userData.CreatedAt,
-		UpdatedAt: userData.UpdatedAt,
-		Email:     userData.Email,
+		ID:          userData.ID,
+		CreatedAt:   userData.CreatedAt,
+		UpdatedAt:   userData.UpdatedAt,
+		Email:       userData.Email,
+		IsChirpyRed: userData.IsChirpyRed,
 	}
 	err = encodeJSON(w, userReturn, 201)
 	if err != nil {

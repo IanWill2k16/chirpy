@@ -17,6 +17,7 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 	envPlatform    string
 	jwtSecret      string
+	polkaKey       string
 }
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	envPlatformVar := os.Getenv("PLATFORM")
 	jwtSecretVar := os.Getenv("JWT_SECRET")
+	polkaApiKey := os.Getenv("POLKA_KEY")
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -35,6 +37,7 @@ func main() {
 		dbQueries:   database.New(db),
 		envPlatform: envPlatformVar,
 		jwtSecret:   jwtSecretVar,
+		polkaKey:    polkaApiKey,
 	}
 
 	const port = "8080"
@@ -53,6 +56,8 @@ func main() {
 	mux.HandleFunc("POST /api/login", apiCfg.loginUser)
 	mux.HandleFunc("POST /api/refresh", apiCfg.refreshToken)
 	mux.HandleFunc("POST /api/revoke", apiCfg.revokeRefreshToken)
+
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.upgradeUser)
 
 	mux.HandleFunc("POST /api/chirps", apiCfg.createChirp)
 	mux.HandleFunc("GET /api/chirps", apiCfg.getChirps)

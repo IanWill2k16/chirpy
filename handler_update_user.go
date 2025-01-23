@@ -48,10 +48,11 @@ func (cfg *apiConfig) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userReturn := User{
-		ID:        result.ID,
-		CreatedAt: result.CreatedAt,
-		UpdatedAt: result.UpdatedAt,
-		Email:     result.Email,
+		ID:          result.ID,
+		CreatedAt:   result.CreatedAt,
+		UpdatedAt:   result.UpdatedAt,
+		Email:       result.Email,
+		IsChirpyRed: result.IsChirpyRed,
 	}
 	encodeJSON(w, userReturn, 200)
 }
