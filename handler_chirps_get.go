@@ -4,15 +4,31 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/IanWill2k16/chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) getChirps(w http.ResponseWriter, r *http.Request) {
-	allChirps, err := cfg.dbQueries.GetAllChirps(r.Context())
-	if err != nil {
-		returnError(w, "Something went wrong", 500)
-		return
+	author := r.URL.Query().Get("author_id")
+	allChirps := []database.Chirp{}
+	var err error
+	if author != "" {
+		authorID, err := uuid.Parse(author)
+		if err != nil {
+			returnError(w, "Invalid author_id format", 400)
+		}
+		allChirps, err = cfg.dbQueries.GetAllChirpsByUser(r.Context(), authorID)
+		if err != nil {
+			returnError(w, "Something went wrong", 500)
+		}
+	} else {
+		allChirps, err = cfg.dbQueries.GetAllChirps(r.Context())
+		if err != nil {
+			returnError(w, "Something went wrong", 500)
+			return
+		}
 	}
+
 	allChirpsReturn := []Chirp{}
 	for _, chirp := range allChirps {
 		formattedChirp := Chirp{
