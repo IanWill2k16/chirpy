@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/IanWill2k16/chirpy/internal/database"
 	"github.com/google/uuid"
@@ -10,6 +11,7 @@ import (
 
 func (cfg *apiConfig) getChirps(w http.ResponseWriter, r *http.Request) {
 	author := r.URL.Query().Get("author_id")
+	sortVar := r.URL.Query().Get("sort")
 	allChirps := []database.Chirp{}
 	var err error
 	if author != "" {
@@ -39,6 +41,12 @@ func (cfg *apiConfig) getChirps(w http.ResponseWriter, r *http.Request) {
 			UserID:    chirp.UserID,
 		}
 		allChirpsReturn = append(allChirpsReturn, formattedChirp)
+	}
+
+	if sortVar == "desc" {
+		sort.Slice(allChirpsReturn, func(i, j int) bool { return allChirpsReturn[i].CreatedAt.After(allChirpsReturn[j].CreatedAt) })
+	} else {
+		sort.Slice(allChirpsReturn, func(i, j int) bool { return allChirpsReturn[i].CreatedAt.Before(allChirpsReturn[j].CreatedAt) })
 	}
 
 	err = encodeJSON(w, allChirpsReturn, 200)
